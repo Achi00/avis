@@ -101,7 +101,32 @@ const DataTable = () => {
   };
 
   // This function will be called when a card is selected in the Cards component
-  const handleCardSelect = (userId: number, value: string) => {
+  const handleCardSelect = async (userId: number, value: string) => {
+    try {
+      const response = await fetch(`http://localhost:8080/users/${userId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ value }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      // Update the client-side state if necessary
+      // For example, update the user's interest in the `data` state array
+      const updatedUsers = data.map((user) =>
+        user.id === userId ? { ...user, value } : user
+      );
+      setData(updatedUsers);
+
+      console.log("Interest updated successfully");
+      // Here you would hide the Cards component and show a success message
+    } catch (error) {
+      console.error("Error updating interest:", error);
+    }
     console.log(`Card selected with userId: ${userId}, value: ${value}`);
     setShowCards(false); // Hide the cards component
     setShowThankYou(true); // Show the thank you message
@@ -181,10 +206,6 @@ const DataTable = () => {
       </div>
     </div>
   );
-};
-
-const updateUserChoiceInDatabase = (userId: number, value: string) => {
-  console.log(`User choice updated to ${userId} value: ${value}`);
 };
 
 export default DataTable;
