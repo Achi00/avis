@@ -173,7 +173,6 @@ const DataTable = () => {
               key={row.id}
               className="hover:bg-[#D4002A] text-lg cursor-pointer border-b border-gray-500"
               onClick={() => handleRowClick(row.original.id)}
-              // onClick={() => console.log(row.original.id)}
             >
               {row.getVisibleCells().map((cell) => (
                 <TableCell key={cell.id}>

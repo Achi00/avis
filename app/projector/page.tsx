@@ -36,7 +36,24 @@ const page = () => {
 
   useEffect(() => {
     fetchUsersWithInterest();
-    // Consider removing or adjusting the interval based on your needs
+
+    // Establish SSE connection to listen for updates
+    const eventSource = new EventSource("http://localhost:8080/events");
+    console.log("listening to events");
+    eventSource.onmessage = (event) => {
+      // Check for specific event type if necessary
+      if (event.data === "update") {
+        console.log(
+          "Data update detected, fetching latest users with interest..."
+        );
+        fetchUsersWithInterest();
+      }
+    };
+
+    // Cleanup on component unmount
+    return () => {
+      eventSource.close();
+    };
   }, []);
 
   // Effect to cycle through usersWithInterest
@@ -47,7 +64,7 @@ const page = () => {
         const nextIndex = (prevIndex + 1) % usersWithInterest.length;
         return nextIndex;
       });
-    }, 2000); // Adjust time as needed
+    }, 10000); // Adjust time as needed
 
     return () => clearInterval(interval); // Clear the interval on cleanup
   }, [usersWithInterest.length]); // Depend on usersWithInterest.length to reset interval when data updates
@@ -60,29 +77,18 @@ const page = () => {
 
   return (
     <div className="flex justify-center items-center h-screen">
-      <div key={currentUser.id} className="text-center">
-        <h1 className="text-4xl font-extrabold">{currentUser.name}</h1>
-        <h2 className="text-3xl font-semibold">{currentUser.value}</h2>
-      </div>
+      <ul>
+        <li key={currentUser.id} className="text-center">
+          <h1 className="scroll-m-20 text-5xl font-extrabold tracking-tight lg:text-5xl">
+            {currentUser.name}
+          </h1>
+          <h2 className="scroll-m-20 pb-2 text-3xl font-semibold tracking-tight first:mt-0">
+            {currentUser.value}
+          </h2>
+        </li>
+      </ul>
     </div>
   );
 };
-
-{
-  /* <div className="flex justify-center items-center h-screen">
-      <ul>
-        {usersWithInterest.map((user: User) => (
-          <li key={user.id} className="text-center">
-            <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl">
-              {user.name}
-            </h1>
-            <h2 className="scroll-m-20 pb-2 text-3xl font-semibold tracking-tight first:mt-0">
-              {user.value}
-            </h2>
-          </li>
-        ))}
-      </ul>
-    </div> */
-}
 
 export default page;
